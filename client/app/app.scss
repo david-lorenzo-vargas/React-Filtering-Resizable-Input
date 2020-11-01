@@ -1,0 +1,31 @@
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  width: 100%;
+}
+
+.range-input {
+  width: 100%;
+}
+
+.products {
+  width: 100%;
+  padding: 0 30px;
+}
+
+.input {
+  display: flex;
+  justify-content: space-between;
+
+  &__item {
+    margin: 40px;
+    border: 2px solid  rgb(133, 184, 247);
+    border-radius: 15px;
+    padding: 5px;
+    width: 50px;
+    text-align: center;
+  }
+}
