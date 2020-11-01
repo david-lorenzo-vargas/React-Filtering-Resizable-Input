@@ -209,15 +209,6 @@ class RangeInput extends React.Component {
     this.props.onChange(values);
   }
 
-  stepPercentageWithPrices() {
-    const { minValue, maxValue, spaces } = this.props;
-    const step = (maxValue - minValue) / spaces;
-    const width = maxValue + minValue;
-    const percentage = (step * 100) / width;
-
-    return Math.round(percentage);
-  }
-
   handleBarMouseDown(type) {
     const { left } = this.state;
     window.addEventListener('mousemove', this.handleMouseMove);
