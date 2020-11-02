@@ -114,15 +114,15 @@ class App extends React.Component {
 
     this.state = {
       inputActive: false,
+      displayLeftValue: this.getMinPrice(),
+      displayRightValue: this.getMaxPrice(),
       priceRange: {
-        min: '',
-        max: '',
+        min: this.getMinPrice(),
+        max: this.getMaxPrice(),
       },
     };
 
     this.handleChange = this.handleChange.bind(this);
-    this.getMinPrice = this.getMinPrice.bind(this);
-    this.getMaxPrice = this.getMaxPrice.bind(this);
     this.handleLeftChange = this.handleLeftChange.bind(this);
     this.handleRightChange = this.handleRightChange.bind(this);
   }
@@ -159,13 +159,12 @@ class App extends React.Component {
   }
 
   handleChange(values) {
-    const distance = this.getMaxPrice() - this.getMinPrice();
-    const { priceRange } = this.state;
-
     this.setState({
+      displayRightValue: values.right,
+      displayLeftValue: values.left,
       priceRange: {
-        min: priceRange.min === 0 ? this.getMinPrice() : ((values.left * distance) / 100),
-        max: this.getMaxPrice() - ((values.right * distance) / 100),
+        min: values.left,
+        max: values.right,
       },
     });
   }
@@ -173,35 +172,61 @@ class App extends React.Component {
   handleLeftChange(event) {
     const { value } = event.currentTarget;
     const { priceRange } = this.state;
+    let newState = {};
 
-    this.setState({
-      inputActive: true,
-      priceRange: {
-        min: Number(value),
-        max: priceRange.max === '' ? this.getMaxPrice() : priceRange.max,
-      },
-    });
+    if (value >= this.getMinPrice() && value <= priceRange.max) {
+      newState = {
+        inputActive: true,
+        displayLeftValue: value,
+        priceRange: {
+          min: Number(value),
+          max: priceRange.max === '' ? this.getMaxPrice() : priceRange.max,
+        },
+      };
+    } else {
+      newState = {
+        ...priceRange,
+        displayLeftValue: value,
+      };
+    }
+
+    this.setState(newState);
   }
 
   handleRightChange(event) {
     const { value } = event.currentTarget;
     const { priceRange } = this.state;
+    let newState = {};
 
-    this.setState({
-      inputActive: true,
-      priceRange: {
-        max: Number(value),
-        min: priceRange.min === '' ? this.getMinPrice() : priceRange.min,
-      },
-    });
+    if (value <= this.getMaxPrice() && value >= priceRange.min) {
+      newState = {
+        inputActive: true,
+        displayRightValue: value,
+        priceRange: {
+          max: Number(value),
+          min: priceRange.min === '' ? this.getMinPrice() : priceRange.min,
+        },
+      };
+    } else {
+      newState = {
+        ...priceRange,
+        displayRightValue: value,
+      };
+    }
+
+    this.setState(newState);
   }
 
   render() {
     const item = this.getItems();
-    const { priceRange, inputActive } = this.state;
+    const {
+      priceRange,
+      inputActive,
+      displayLeftValue,
+      displayRightValue,
+    } = this.state;
     const min = this.getMinPrice();
     const max = this.getMaxPrice();
-    console.log(this.state);
     return (
       <div className={styles['app']}>
         <div className={styles['logo']}>
@@ -222,13 +247,13 @@ class App extends React.Component {
           <input
             className={styles['input__item']}
             type="text"
-            placeholder={priceRange.min === 0 || priceRange.min === '' ? min : priceRange.min}
+            value={displayLeftValue}
             onChange={this.handleLeftChange}
           />
           <input
             className={styles['input__item']}
             type="text"
-            placeholder={priceRange.max === '' || priceRange.max === 0 ? max : priceRange.max}
+            value={displayRightValue}
             onChange={this.handleRightChange}
           />
         </div>
