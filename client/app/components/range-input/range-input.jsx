@@ -4,17 +4,65 @@ import Bar from '../bar';
 import Tooltip from '../tooltip';
 import styles from './range-input.scss';
 
+const convertLeftIntoPercentage = (amount, maxValue) => (maxValue / 100) * amount;
+
+const convertRightIntoPercentage = (amount, maxValue) => {
+  const newAmount = (100 - Math.abs(amount));
+
+  return (maxValue / 100) * newAmount;
+};
+
+const getValuePercentage = (props) => {
+  const { minValue, maxValue, value } = props;
+  const percentage = ((100 / (maxValue - minValue)) * (value.min - minValue));
+
+  return percentage;
+};
+
+const getRightValuePercentage = (props) => {
+  const { maxValue, value } = props;
+  const percentage = (((100 / maxValue) * value.max) - 100) * -1;
+
+  return percentage;
+};
+
+export const getCoordinates = (props) => {
+  const { value } = props;
+
+  if (!value) {
+    return {};
+  }
+
+  const leftPercent = getValuePercentage(props);
+  const rightPercent = getRightValuePercentage(props);
+  const widthPercent = Math.round(100 - (leftPercent + rightPercent));
+
+  return {
+    leftPercent,
+    rightPercent,
+    widthPercent,
+  };
+};
+
+const getMagnetValue = (percentage, spaces) => {
+  const step = 100 / spaces;
+  const rounded = (Math.round(percentage / step)) * step;
+
+  return rounded;
+};
+
 class RangeInput extends React.Component {
   constructor(props) {
     super(props);
+    const { leftPercent, rightPercent } = getCoordinates(props);
 
     this.state = {
       isMouseActive: false,
       toogleActive: '',
       type: '',
-      left: 0,
+      left: leftPercent,
       lastLeftPosition: 0,
-      right: 0,
+      right: rightPercent,
       width: 100,
       mouseDistance: 0,
     };
@@ -30,18 +78,35 @@ class RangeInput extends React.Component {
   // Events
   // ===================================
 
-  getPercentage() {
+  getWidthPercentage() {
     const { left, right } = this.state;
     const selectedWidth = 100 - (left + right);
     return selectedWidth;
   }
 
-  getMagnetValue(percentage) {
-    const { spaces } = this.props;
-    const step = 100 / spaces;
-    const rounded = (Math.round(percentage / step)) * step;
+  static getDerivedStateFromProps(props, state) {
+    const { left, right, isMouseActive } = state;
+    const { sticky, spaces } = props;
+    const { leftPercent, rightPercent, widthPercent } = getCoordinates(props);
 
-    return rounded;
+    const haveCoordinatesChanged = (
+      leftPercent !== left ||
+      rightPercent !== right
+    );
+
+    const newLeft = sticky ? getMagnetValue(leftPercent, spaces) : leftPercent;
+    const newRight = sticky ? getMagnetValue(rightPercent, spaces) : rightPercent;
+    const newWidth = sticky ? (100 - (newLeft + newRight)) : widthPercent;
+
+    if (haveCoordinatesChanged && !isMouseActive) {
+      return {
+        left: newLeft,
+        right: newRight,
+        width: newWidth,
+      };
+    }
+
+    return null;
   }
 
   calculatePercentage(value, width) {
@@ -94,12 +159,11 @@ class RangeInput extends React.Component {
 
   handleToggleLeftMove(event) {
     const { right } = this.state;
-    const { sticky } = this.props;
+    const { sticky, spaces } = this.props;
     const { width, left } = this.inputRangeRef.current.getBoundingClientRect();
     const value = event.clientX - left;
     const percentage = this.calculatePercentage(value, width);
-    const magnetValue = this.getMagnetValue(percentage);
-
+    const magnetValue = getMagnetValue(percentage, spaces);
     const newLeft = sticky ? magnetValue : percentage;
 
     const isExceedingThresholds = (
@@ -120,11 +184,11 @@ class RangeInput extends React.Component {
 
   handleToggleRightMove(event) {
     const { left } = this.state;
-    const { sticky } = this.props;
+    const { sticky, spaces } = this.props;
     const bounds = this.inputRangeRef.current.getBoundingClientRect();
     const value = (event.clientX - (bounds.left + bounds.width)) * -1;
     const percentage = this.calculatePercentage(value, bounds.width);
-    const magnetValue = this.getMagnetValue(percentage);
+    const magnetValue = getMagnetValue(percentage, spaces);
 
     const newRight = sticky ? magnetValue : percentage;
 
@@ -188,6 +252,7 @@ class RangeInput extends React.Component {
   }
 
   handleMouseMove(event) {
+    const { maxValue, minValue } = this.props;
     const {
       isMouseActive, type, left, right,
     } = this.state;
@@ -201,9 +266,9 @@ class RangeInput extends React.Component {
     }
 
     const values = {
-      left: Math.round(left),
-      right: Math.round(right),
-      percentage: Math.round(this.getPercentage()),
+      left: Math.round(convertLeftIntoPercentage(left, maxValue)) + minValue,
+      right: Math.round(convertRightIntoPercentage(right, maxValue)),
+      percentage: Math.round(this.getWidthPercentage()),
     };
 
     this.props.onChange(values);
@@ -234,17 +299,34 @@ class RangeInput extends React.Component {
       toogleActive,
     } = this.state;
     const { value, minValue, maxValue } = this.props;
-    console.log(this.stepPercentageWithPrices());
     return (
       <div className={styles['range-input']} ref={this.inputRangeRef}>
-        <Bar left={left} right={right} type="bar" width={width} onMouseDown={this.handleBarMouseDown} />
-        <Tooltip left={left} type="left" text={value.min === '' || value.min === 0 ? minValue : value.min} active={isMouseActive} typeActive={toogleActive} />
+        <Bar
+          left={left}
+          right={right}
+          type="bar"
+          width={width}
+          onMouseDown={this.handleBarMouseDown}
+        />
+        <Tooltip
+          left={left}
+          type="left"
+          text={value.min === '' || value.min === 0 ? minValue : value.min}
+          active={isMouseActive}
+          typeActive={toogleActive}
+        />
         <Toggle
           left={left}
           type="left"
           onMouseDown={this.handleMouseDown}
         />
-        <Tooltip right={right} type="right" text={value.max === 0 || value.max === '' ? maxValue : value.max} active={isMouseActive} typeActive={toogleActive} />
+        <Tooltip
+          right={right}
+          type="right"
+          text={value.max === 0 || value.max === '' ? maxValue : value.max}
+          active={isMouseActive}
+          typeActive={toogleActive}
+        />
         <Toggle
           right={right}
           type="right"
