@@ -1,13 +1,21 @@
-# filtering range input
+# FILTERING RANGE INPUT
 
-Initial page<br>
-![range-input1](https://user-images.githubusercontent.com/72414745/99600380-9e0c4100-29fd-11eb-8e02-2524ff8d6681.jpg)
+## Description
+Filtering resizable range input application built in React with SCSS modules.
 
-Left toggle active and filtering<br>
-![range-input-2](https://user-images.githubusercontent.com/72414745/99600382-9ea4d780-29fd-11eb-92e3-bf3958989f67.jpg)
+Filter the products by price by resizing the bar with you mouse or by typing the price range in the input fields. A tooltip will be rendered on top of both toggles when the toggles or the bar is active showing the actual price range.
 
-Right toggle active and filtering<br>
-![range-input-3](https://user-images.githubusercontent.com/72414745/99600383-9ea4d780-29fd-11eb-8e36-21c60ae297c1.jpg)
+## Technologies
+HTML, CSS modues, React, Babel, Eslint, Stylelint, Webpack
 
-Bar active (both toggles active) and filtering<br>
-![range-input-4](https://user-images.githubusercontent.com/72414745/99600384-9f3d6e00-29fd-11eb-87d6-18ed676b57bc.jpg)
+## Demo
+
+Filtering products with toggles
+![resizable-input1](https://user-images.githubusercontent.com/72414745/101018063-3ca2b100-356b-11eb-98ee-1ac8bae30146.gif)
+
+Filtering roducts with inputs
+![resizable-input2](https://user-images.githubusercontent.com/72414745/101018065-3dd3de00-356b-11eb-81c1-d9a210a641b2.gif)
+
+Filtering products with bar
+![resizable-input3](https://user-images.githubusercontent.com/72414745/101018067-3e6c7480-356b-11eb-93fd-7634629d79ae.gif)
+
