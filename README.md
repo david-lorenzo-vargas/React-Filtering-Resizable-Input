@@ -6,7 +6,7 @@ Filtering resizable range input application built in React with SCSS modules.
 Filter the products by price by resizing the bar with you mouse or by typing the price range in the input fields. A tooltip will be rendered on top of both toggles when the toggles or the bar is active showing the actual price range.
 
 ## Technologies
-HTML, CSS modues, React, Babel, Eslint, Stylelint, Webpack
+HTML, CSS modues, JavaScript, React, Babel, Eslint, Stylelint, Webpack
 
 ## Demo
 
